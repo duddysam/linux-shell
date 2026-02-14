@@ -1,0 +1,6 @@
+ls -l ; pwd ; ls
+cat Makefile
+test some nonesense
+another bit of nonsense
+quit
+this shouldnt print
