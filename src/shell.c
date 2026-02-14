@@ -13,7 +13,7 @@
 
 
 int main(int argc, char** argv) {
-    
+
     // TOO MANY ARGUMENTS
     if (argc >= 3) {
         fprintf(stderr, "Usage: %s <batchFile>\n", argv[0]);
@@ -23,8 +23,19 @@ int main(int argc, char** argv) {
     // BATCH MODE
     if (argc == 2) {
         printf("entering batch mode\n");
-        execute_file(cmd, argv[1]);
+        //execute_file(cmd, argv[1]);
+        FILE *fp = fopen(argv[1], "r");
+        if (fp == NULL) {
+            perror("Error opening file");
+            return 1;
+        }
+        while(fgets(cmd, sizeof(cmd), fp) != NULL) {
+            printf("%s", cmd);
+            if(execute(cmd) == 1) {exit(1);}
+        }
+        return 0;
     }
+
 
     // INTERACTIVE MODE
     if (argc == 1) {
@@ -37,5 +48,5 @@ int main(int argc, char** argv) {
         }
     }
     return 0;
-    
+
 }

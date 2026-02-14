@@ -12,8 +12,10 @@
 
 
 int execute(char* cmd) {
+    int out = 0;
     if(strlen(cmd) >= 512) {
         printf("Command exceeds maximum length. Not able to execute\n");
+        return out;
     } else {
         cmd[strlen(cmd)-1] = '\0';
         // now we must parse through the command
@@ -23,6 +25,10 @@ int execute(char* cmd) {
 
         whole_cmd = strtok_r(cmd, ";", &outer_saveptr);
         while (whole_cmd != NULL) {
+            int fd[2];
+            if(pipe(fd) == -1) {
+                fprintf(stderr, "pipe(fd) failed\n");
+            }
             int pid = fork();
             if (pid == -1) {
                 fprintf(stderr, "fork() failed\n");
@@ -38,30 +44,39 @@ int execute(char* cmd) {
                     args[i] = arg_cmd;
                     i++;
                     arg_cmd = strtok_r(NULL, " ", &inner_saveptr);
-
                 }
                 args[i] = NULL;
-                execvp(args[0], args);
-                printf("unable to execute command\n");
-                _exit(1);
+                printf("args[0] == %s and i == %d\n", args[0], i);
+                if(strcmp(args[0], "quit") == 0 && i == 1) {
+                    printf("in the quit condition\n");
+                    close(fd[0]);
+                    int x = 1;
+                    write(fd[1], &x, sizeof(int));
+                    close(fd[1]);
+                    _exit(1);
+                } else {
+                    close(fd[0]);
+                    int x = 0;
+                    write(fd[1], &x, sizeof(int));
+                    close(fd[1]);
+                    execvp(args[0], args);
+                    printf("unable to execute command\n");
+                    _exit(1);
+                }
             } else {
                 wait(NULL);
+                close(fd[1]);
+                int z;
+                read(fd[0], &z, sizeof(int));
+                close(fd[0]);
+                printf("adding %d to out\n", z);
+                out += z;
+                if (out > 1) {out = 1;}
                 whole_cmd = strtok_r(NULL, ";", &outer_saveptr);
             }
         }
     }
-    return 0;
+    return out;
 }
 
-int execute_file(char* cmd, char* file) {
-    FILE *fp = fopen(file, "r");
-    if (fp == NULL) {
-        perror("Error opening file");
-        return 1;
-    }
-    while(fgets(cmd, sizeof(cmd), fp) != NULL) {
-        printf("%s", cmd);
-        execute(cmd);
-    }
-    return 0;
-}
+
