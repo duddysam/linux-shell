@@ -4,9 +4,9 @@
  * 2/14/2026
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "functions.h"
 
 
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
     // BATCH MODE
     if (argc == 2) {
         printf("entering batch mode\n");
-        read_file(cmd, argv[1]);
+        //execute_file(cmd, argv[1]);
     }
 
     // INTERACTIVE MODE
@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
             printf("prompt>>");
             fgets(cmd, sizeof(cmd), stdin);
             printf("%s", cmd);
+            execute(cmd);
         }
     }
     return 0;
