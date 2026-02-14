@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "functions.h"
+#include <unistd.h>
+#include <sys/wait.h>
 
 
 int main(int argc, char** argv) {
@@ -21,7 +23,7 @@ int main(int argc, char** argv) {
     // BATCH MODE
     if (argc == 2) {
         printf("entering batch mode\n");
-        //execute_file(cmd, argv[1]);
+        execute_file(cmd, argv[1]);
     }
 
     // INTERACTIVE MODE

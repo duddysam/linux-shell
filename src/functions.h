@@ -7,18 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
-int read_file(char* cmd, char* file) {
-    FILE *fp = fopen(file, "r");
-    if (fp == NULL) {
-        perror("Error opening file");
-        return 1;
-    }
-    while(fgets(cmd, sizeof(cmd), fp) != NULL) {
-        printf("%s", cmd);
-    }
-    return 0;
-}
 
 int execute(char* cmd) {
     if(strlen(cmd) >= 512) {
@@ -32,22 +23,45 @@ int execute(char* cmd) {
 
         whole_cmd = strtok_r(cmd, ";", &outer_saveptr);
         while (whole_cmd != NULL) {
-            printf("whole_cmd: %s\n", whole_cmd);
-
-            char* arg_cmd;
-            arg_cmd = strtok_r(whole_cmd, " ", &inner_saveptr);
-            char* args[10];
-            int i = 0;
-            while (arg_cmd != NULL) {
-                printf("adding %s to index %d\n", arg_cmd, i);
-                args[i] = arg_cmd;
-                i++;
-                arg_cmd = strtok_r(NULL, " ", &inner_saveptr);
-
+            int pid = fork();
+            if (pid == -1) {
+                fprintf(stderr, "fork() failed\n");
+                _exit(1);
             }
-            args[i] = NULL;
-            whole_cmd = strtok_r(NULL, ";", &outer_saveptr);
+            if (pid == 0) {
+                // in the child process
+                char* arg_cmd;
+                arg_cmd = strtok_r(whole_cmd, " ", &inner_saveptr);
+                char* args[10];
+                int i = 0;
+                while (arg_cmd != NULL) {
+                    args[i] = arg_cmd;
+                    i++;
+                    arg_cmd = strtok_r(NULL, " ", &inner_saveptr);
+
+                }
+                args[i] = NULL;
+                execvp(args[0], args);
+                printf("unable to execute command\n");
+                _exit(1);
+            } else {
+                wait(NULL);
+                whole_cmd = strtok_r(NULL, ";", &outer_saveptr);
+            }
         }
+    }
+    return 0;
+}
+
+int execute_file(char* cmd, char* file) {
+    FILE *fp = fopen(file, "r");
+    if (fp == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    while(fgets(cmd, sizeof(cmd), fp) != NULL) {
+        printf("%s", cmd);
+        execute(cmd);
     }
     return 0;
 }
