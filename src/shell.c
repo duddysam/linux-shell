@@ -19,6 +19,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Usage: %s <batchFile>\n", argv[0]);
         return 0;
     }
+
     char cmd[1000];
     // BATCH MODE
     if (argc == 2) {
@@ -36,15 +37,12 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-
     // INTERACTIVE MODE
     if (argc == 1) {
-        printf("entering interactive mode\n");
         while(1) {
             printf("prompt>>");
             fgets(cmd, sizeof(cmd), stdin);
-            printf("%s", cmd);
-            execute(cmd);
+            if(execute(cmd) == 1) {exit(1);}
         }
     }
     return 0;

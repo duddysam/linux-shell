@@ -46,9 +46,7 @@ int execute(char* cmd) {
                     arg_cmd = strtok_r(NULL, " ", &inner_saveptr);
                 }
                 args[i] = NULL;
-                printf("args[0] == %s and i == %d\n", args[0], i);
                 if(strcmp(args[0], "quit") == 0 && i == 1) {
-                    printf("in the quit condition\n");
                     close(fd[0]);
                     int x = 1;
                     write(fd[1], &x, sizeof(int));
@@ -69,7 +67,6 @@ int execute(char* cmd) {
                 int z;
                 read(fd[0], &z, sizeof(int));
                 close(fd[0]);
-                printf("adding %d to out\n", z);
                 out += z;
                 if (out > 1) {out = 1;}
                 whole_cmd = strtok_r(NULL, ";", &outer_saveptr);
